@@ -1,4 +1,4 @@
-# Vita' Loan Tool 🍕
+# Vita'-Loan-Tool 🍕
 
 A bilingual (Spanish/English) interest-free loan calculator and payment tracker, built with Claude.
 
