@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Vita' Loan Tool 🍕</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,700&family=Inter:wght@400;600;700&display=swap');
+  :root{
+    --green:#1E4D3B; --flour:#FAF6EF; --tomato:#C93A2B; --cheese:#E8A13D;
+    --ink:#22271F; --muted:#6B7263; --line:#E7E0D2;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--flour);font-family:'Inter',system-ui,sans-serif;color:var(--ink)}
+  header{background:var(--green);padding:22px 20px;display:flex;justify-content:space-between;align-items:flex-start;gap:12px}
+  h1{font-family:'Fraunces',Georgia,serif;font-size:28px;margin:0;color:var(--flour);letter-spacing:-.5px}
+  .sub{margin:2px 0 0;color:#CFE3D6;font-size:14px}
+  .tag{margin:6px 0 0;color:var(--cheese);font-size:13px;font-style:italic}
+  .langs{display:flex;gap:6px}
+  .langs button{padding:6px 12px;border-radius:8px;border:1.5px solid #CFE3D6;background:transparent;color:#CFE3D6;font-weight:700;font-size:13px;cursor:pointer}
+  .langs button.on{background:var(--cheese);border-color:var(--cheese);color:var(--ink)}
+  main{max-width:480px;margin:0 auto;padding:20px 16px 40px}
+  .card{background:#fff;border:1px solid var(--line);border-radius:16px;padding:20px;margin-bottom:16px;box-shadow:0 1px 3px rgba(30,77,59,.08)}
+  h2{font-family:'Fraunces',Georgia,serif;font-size:20px;margin:0 0 14px}
+  label{display:block;font-size:13px;font-weight:600;color:var(--muted);margin:10px 0 4px}
+  input{width:100%;padding:12px 14px;font-size:17px;border:1.5px solid var(--line);border-radius:10px;background:var(--flour);font-family:inherit}
+  .chips{display:flex;gap:8px;margin-bottom:16px}
+  .chip{flex:1;padding:10px 0;border-radius:10px;border:1.5px solid var(--line);background:var(--flour);font-size:15px;font-weight:600;color:var(--muted);cursor:pointer}
+  .chip.on{background:var(--green);border-color:var(--green);color:var(--flour)}
+  .cta{width:100%;padding:14px 0;border-radius:12px;border:none;background:var(--tomato);color:#fff;font-size:16px;font-weight:700;cursor:pointer;font-family:inherit}
+  .ghost{padding:8px 14px;border-radius:10px;border:1.5px solid #B9C4B3;background:transparent;color:var(--green);font-size:13px;font-weight:600;cursor:pointer}
+  .err{color:var(--tomato);font-size:14px;margin:0 0 12px}
+  .center{text-align:center}
+  .big{font-family:'Fraunces',Georgia,serif;font-size:26px;margin:6px 0 2px;color:var(--green)}
+  .small{font-size:13px;color:var(--muted);margin:0}
+  .statrow{display:flex;gap:10px;margin-top:14px}
+  .stat{flex:1;background:var(--flour);border-radius:12px;padding:10px 8px;display:flex;flex-direction:column;gap:2px}
+  .stat .l{font-size:12px;color:var(--muted);font-weight:600}
+  .stat .v{font-size:19px;font-weight:700;font-family:'Fraunces',Georgia,serif}
+  .hist{display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid #F0EBDE;font-size:14px}
+  .tipcard{background:var(--green)}
+  .tipcard h2{color:var(--cheese)}
+  .tipcard p{color:var(--flour);font-size:15px;line-height:1.55;min-height:66px}
+  .tipcard .ghost{border-color:#CFE3D6;color:#CFE3D6}
+  .note{text-align:center;font-size:12px;color:#9AA294;margin-top:8px}
+  .row{display:flex;gap:10px;justify-content:center;margin-top:12px}
+  svg{width:100%;max-width:230px}
+  .done{font-family:'Fraunces',Georgia,serif;font-size:20px;color:var(--green);margin-top:16px}
+  .loanrow{display:flex;align-items:center;gap:14px;padding:12px 0;border-bottom:1px solid #F0EBDE;cursor:pointer}
+  .loanrow:last-child{border-bottom:none}
+  .loanrow .mini{width:48px;flex-shrink:0}
+  .loanrow .info{flex:1;min-width:0}
+  .loanrow .name{font-weight:700;font-size:16px;margin:0}
+  .loanrow .meta{font-size:13px;color:var(--muted);margin:2px 0 0}
+  .loanrow .pct{font-family:'Fraunces',Georgia,serif;font-weight:700;font-size:17px;color:var(--green)}
+  .back{background:none;border:none;color:var(--green);font-weight:700;font-size:15px;cursor:pointer;padding:0;margin-bottom:12px;font-family:inherit}
+</style>
+</head>
+<body>
+<header>
+  <div>
+    <h1>Vita' la Pizza <span style="font-size:22px">🍕</span></h1>
+    <p class="sub" id="program"></p>
+    <p class="tag" id="tagline"></p>
+  </div>
+  <div class="langs">
+    <button id="btn-es" onclick="setLang('es')">ES</button>
+    <button id="btn-en" onclick="setLang('en')">EN</button>
+  </div>
+</header>
+<main id="app"></main>
+
+<script>
+// ─── Vita' Loan Tool (multi-loan) — built by Danniel Cabral with Claude ───
+const T = {
+  es: {
+    program:"Programa de Préstamos sin Interés", tagline:"Cada pago completa una porción.",
+    loansTitle:"Préstamos activos", addLoan:"+ Nuevo préstamo", empty:"Aún no hay préstamos. Crea el primero.",
+    setupTitle:"Nuevo préstamo", name:"Nombre del empleado", amount:"Monto del préstamo (RD$)",
+    payment:"Cuota fija por período (RD$)", frequency:"Frecuencia de pago", weekly:"Semanal", biweekly:"Quincenal",
+    create:"Crear préstamo", cancel:"Cancelar",
+    invalid:"Completa el nombre, y escribe un monto y una cuota mayores que cero. La cuota no puede ser mayor que el préstamo.",
+    progress:"Progreso", paid:"Pagado", remaining:"Restante", paymentsLeft:"Cuotas restantes",
+    payoff:"Fecha estimada de pago total", registerPayment:"Registrar pago de RD$", lastPartial:"Última cuota (parcial): RD$",
+    history:"Historial de pagos", noPayments:"Aún no hay pagos registrados.",
+    paymentN:"Pago", completed:"🎉 ¡Préstamo pagado por completo! Libre de deudas.",
+    deleteLoan:"Eliminar préstamo", confirmDelete:"¿Seguro que quieres eliminar este préstamo y su historial?",
+    back:"← Todos los préstamos",
+    tipsTitle:"💡 Consejo de finanzas", nextTip:"Otro consejo", undo:"Deshacer último pago",
+    of:"de", weeks:"semanas", fortnights:"quincenas", savedNote:"Los datos se guardan en este dispositivo automáticamente.",
+    tips:[
+      "Paga primero las deudas con interés más alto. Un préstamo sin interés, como este, siempre debe ser el último en preocuparte.",
+      "Antes de pedir prestado, pregunta: ¿cuánto pagaré en TOTAL? Si no te lo dicen claro, es una mala señal.",
+      "Guarda algo cada quincena, aunque sea poco. RD$200 cada quincena son más de RD$5,000 al año.",
+      "Un prestamista informal que cobra 10% semanal duplica tu deuda en menos de 2 meses. Evítalos siempre que puedas.",
+      "Apunta tus gastos por una semana. Saber a dónde va tu dinero es el primer paso para controlarlo.",
+      "Crea un fondo de emergencia pequeño. Así la próxima urgencia no te obliga a pedir prestado.",
+      "Si te sobra dinero un mes, adelanta una cuota. Terminar antes te libera más rápido."
+    ]
+  },
+  en: {
+    program:"Interest-Free Loan Program", tagline:"Every payment completes a slice.",
+    loansTitle:"Active loans", addLoan:"+ New loan", empty:"No loans yet. Create the first one.",
+    setupTitle:"New loan", name:"Employee name", amount:"Loan amount (RD$)",
+    payment:"Fixed payment per period (RD$)", frequency:"Payment frequency", weekly:"Weekly", biweekly:"Biweekly",
+    create:"Create loan", cancel:"Cancel",
+    invalid:"Fill in the name, and enter an amount and a payment greater than zero. The payment can't be larger than the loan.",
+    progress:"Progress", paid:"Paid", remaining:"Remaining", paymentsLeft:"Payments left",
+    payoff:"Estimated payoff date", registerPayment:"Record payment of RD$", lastPartial:"Final payment (partial): RD$",
+    history:"Payment history", noPayments:"No payments recorded yet.",
+    paymentN:"Payment", completed:"🎉 Loan fully paid! Debt-free.",
+    deleteLoan:"Delete loan", confirmDelete:"Are you sure you want to delete this loan and its history?",
+    back:"← All loans",
+    tipsTitle:"💡 Finance tip", nextTip:"Another tip", undo:"Undo last payment",
+    of:"of", weeks:"weeks", fortnights:"fortnights", savedNote:"Data is saved automatically on this device.",
+    tips:[
+      "Pay off the highest-interest debt first. An interest-free loan like this one should always be your last worry.",
+      "Before borrowing, ask: how much will I pay in TOTAL? If the answer isn't clear, that's a red flag.",
+      "Save something every payday, even a little. RD$200 each fortnight is over RD$5,000 a year.",
+      "An informal lender charging 10% weekly doubles your debt in under 2 months. Avoid them whenever possible.",
+      "Track your spending for one week. Knowing where your money goes is the first step to controlling it.",
+      "Build a small emergency fund so the next urgent expense doesn't force you to borrow.",
+      "If you have extra money one month, pay a payment early. Finishing sooner frees you faster."
+    ]
+  }
+};
+
+// storage with safe fallback
+let mem = {};
+const store = {
+  get(k){ try { return localStorage.getItem(k); } catch(e){ return mem[k] ?? null; } },
+  set(k,v){ try { localStorage.setItem(k,v); } catch(e){ mem[k]=v; } },
+  del(k){ try { localStorage.removeItem(k); } catch(e){ delete mem[k]; } }
+};
+
+let lang = store.get('vita-lang') || 'es';
+let loans = [];
+try { loans = JSON.parse(store.get('vita-loans')) || []; } catch(e){ loans = []; }
+// migrate old single-loan data if present
+try {
+  const old = JSON.parse(store.get('vita-loan'));
+  if(old && old.amount){ old.id = 'migrated'; old.name = old.name || 'Préstamo 1'; loans.push(old); store.del('vita-loan'); saveAll(); }
+} catch(e){}
+
+let view = 'list';          // 'list' | 'new' | 'detail'
+let currentId = null;
+let freq = 'biweekly';
+let tipIdx = 0;
+
+const fmt = n => new Intl.NumberFormat('es-DO',{maximumFractionDigits:0}).format(Math.round(n));
+const $ = id => document.getElementById(id);
+const saveAll = () => store.set('vita-loans', JSON.stringify(loans));
+const getLoan = () => loans.find(l => l.id === currentId);
+
+function setLang(l){ lang = l; store.set('vita-lang', l); render(); }
+function setFreq(f){ freq = f; render(); }
+function nextTip(){ tipIdx++; render(); }
+function goList(){ view='list'; currentId=null; render(); }
+function goNew(){ view='new'; render(); }
+function openLoan(id){ view='detail'; currentId=id; render(); }
+
+function createLoan(){
+  const t = T[lang];
+  const name = $('f-name').value.trim();
+  const amount = parseFloat($('f-amount').value);
+  const payment = parseFloat($('f-payment').value);
+  if(!name || !amount || !payment || amount<=0 || payment<=0 || payment>amount){
+    $('f-err').textContent = t.invalid; return;
+  }
+  const id = Date.now().toString(36);
+  loans.push({ id, name, amount, payment, frequency:freq, startDate:new Date().toISOString(), paymentsMade:[] });
+  saveAll(); openLoan(id);
+}
+function recordPayment(nextAmt){
+  getLoan().paymentsMade.push({date:new Date().toISOString(), amount:nextAmt});
+  saveAll(); render();
+}
+function undoPayment(){
+  getLoan().paymentsMade.pop(); saveAll(); render();
+}
+function deleteLoan(){
+  if(confirm(T[lang].confirmDelete)){
+    loans = loans.filter(l => l.id !== currentId);
+    saveAll(); goList();
+  }
+}
+
+function calc(l){
+  const totalPayments = Math.ceil(l.amount/l.payment);
+  const made = l.paymentsMade.length;
+  const paidSum = l.paymentsMade.reduce((s,p)=>s+p.amount,0);
+  const remaining = Math.max(0, l.amount-paidSum);
+  return { totalPayments, made, paidSum, remaining, isDone: remaining<=0 };
+}
+
+function pizzaSVG(total, done, size){
+  const cx=100, cy=100, r=84;
+  let s = `<svg viewBox="0 0 200 200" ${size?`style="max-width:${size}px"`:''} role="img" aria-label="${done} / ${total}">`;
+  s += `<circle cx="${cx}" cy="${cy}" r="${r+6}" fill="#B3541E" opacity="0.25"/>`;
+  s += `<circle cx="${cx}" cy="${cy}" r="${r+3}" fill="#D9913F" opacity="0.35"/>`;
+  for(let i=0;i<total;i++){
+    const a0=(i/total)*2*Math.PI-Math.PI/2, a1=((i+1)/total)*2*Math.PI-Math.PI/2;
+    const x0=cx+r*Math.cos(a0), y0=cy+r*Math.sin(a0);
+    const x1=cx+r*Math.cos(a1), y1=cy+r*Math.sin(a1);
+    const large = 1/total>0.5 ? 1 : 0;
+    const fill = i<done ? '#E8A13D' : '#F5EBDD';
+    s += `<path d="M ${cx} ${cy} L ${x0} ${y0} A ${r} ${r} 0 ${large} 1 ${x1} ${y1} Z" fill="${fill}" stroke="#B3541E" stroke-width="1.5"/>`;
+  }
+  for(let i=0;i<done;i++){
+    const mid=((i+0.5)/total)*2*Math.PI-Math.PI/2;
+    const pr = Math.min(7, 60/total+3);
+    s += `<circle cx="${cx+r*0.55*Math.cos(mid)}" cy="${cy+r*0.55*Math.sin(mid)}" r="${pr}" fill="#C93A2B"/>`;
+  }
+  return s + `</svg>`;
+}
+
+function render(){
+  const t = T[lang];
+  $('program').textContent = t.program;
+  $('tagline').textContent = t.tagline;
+  $('btn-es').className = lang==='es' ? 'on' : '';
+  $('btn-en').className = lang==='en' ? 'on' : '';
+  let html = '';
+
+  if(view === 'list'){
+    let rows = '';
+    if(loans.length === 0){
+      rows = `<p class="small">${t.empty}</p>`;
+    } else {
+      loans.forEach(l => {
+        const c = calc(l);
+        const pct = Math.round((c.paidSum/l.amount)*100);
+        rows += `<div class="loanrow" onclick="openLoan('${l.id}')">
+          <div class="mini">${pizzaSVG(c.totalPayments, c.made)}</div>
+          <div class="info">
+            <p class="name">${l.name}</p>
+            <p class="meta">RD$${fmt(c.remaining)} ${t.remaining.toLowerCase()} · ${c.made} ${t.of} ${c.totalPayments}</p>
+          </div>
+          <span class="pct">${c.isDone ? '✓' : pct+'%'}</span>
+        </div>`;
+      });
+    }
+    html += `<div class="card">
+      <h2>${t.loansTitle}</h2>
+      ${rows}
+      <button class="cta" style="margin-top:16px" onclick="goNew()">${t.addLoan}</button>
+    </div>`;
+  }
+
+  if(view === 'new'){
+    html += `<div class="card">
+      <button class="back" onclick="goList()">${t.back}</button>
+      <h2>${t.setupTitle}</h2>
+      <label>${t.name}</label>
+      <input id="f-name" type="text" placeholder="Juan">
+      <label>${t.amount}</label>
+      <input id="f-amount" type="number" inputmode="numeric" placeholder="15000">
+      <label>${t.payment}</label>
+      <input id="f-payment" type="number" inputmode="numeric" placeholder="1000">
+      <label>${t.frequency}</label>
+      <div class="chips">
+        <button class="chip ${freq==='weekly'?'on':''}" onclick="setFreq('weekly')">${t.weekly}</button>
+        <button class="chip ${freq==='biweekly'?'on':''}" onclick="setFreq('biweekly')">${t.biweekly}</button>
+      </div>
+      <p class="err" id="f-err"></p>
+      <button class="cta" onclick="createLoan()">${t.create}</button>
+    </div>`;
+  }
+
+  if(view === 'detail'){
+    const l = getLoan();
+    if(!l){ goList(); return; }
+    const c = calc(l);
+    const nextAmt = Math.min(l.payment, c.remaining);
+    const periodDays = l.frequency==='weekly' ? 7 : 15;
+    const left = Math.ceil(c.remaining/l.payment);
+    const payoff = new Date(Date.now()+left*periodDays*86400000)
+      .toLocaleDateString(lang==='es'?'es-DO':'en-US',{day:'numeric',month:'long',year:'numeric'});
+
+    html += `<div class="card center">
+      <button class="back" onclick="goList()" style="display:block;text-align:left">${t.back}</button>
+      <h2>${l.name} — ${t.progress}</h2>
+      ${pizzaSVG(c.totalPayments, c.made, 230)}
+      <p class="big">${c.made} ${t.of} ${c.totalPayments}</p>
+      <p class="small">${l.frequency==='weekly'?t.weeks:t.fortnights}</p>
+      <div class="statrow">
+        <div class="stat"><span class="l">${t.paid}</span><span class="v" style="color:var(--green)">RD$${fmt(c.paidSum)}</span></div>
+        <div class="stat"><span class="l">${t.remaining}</span><span class="v" style="color:var(--tomato)">RD$${fmt(c.remaining)}</span></div>
+      </div>
+      <div class="statrow">
+        <div class="stat"><span class="l">${t.paymentsLeft}</span><span class="v">${left}</span></div>
+        <div class="stat"><span class="l">${t.payoff}</span><span class="v" style="font-size:15px">${c.isDone?'—':payoff}</span></div>
+      </div>
+      ${c.isDone
+        ? `<p class="done">${t.completed}</p>`
+        : `<button class="cta" style="margin-top:16px" onclick="recordPayment(${nextAmt})">
+             ${nextAmt<l.payment ? t.lastPartial+fmt(nextAmt) : t.registerPayment+fmt(nextAmt)}
+           </button>`}
+      <div class="row">
+        ${c.made>0 && !c.isDone ? `<button class="ghost" onclick="undoPayment()">${t.undo}</button>` : ''}
+        <button class="ghost" style="border-color:#D9A79F;color:var(--tomato)" onclick="deleteLoan()">${t.deleteLoan}</button>
+      </div>
+    </div>`;
+
+    let hist = '';
+    if(c.made===0){ hist = `<p class="small">${t.noPayments}</p>`; }
+    else {
+      l.paymentsMade.forEach((p,i)=>{
+        hist += `<div class="hist">
+          <span style="font-weight:600">${t.paymentN} ${i+1}</span>
+          <span class="small">${new Date(p.date).toLocaleDateString(lang==='es'?'es-DO':'en-US')}</span>
+          <span style="color:var(--green);font-weight:700">RD$${fmt(p.amount)}</span>
+        </div>`;
+      });
+    }
+    html += `<div class="card"><h2>${t.history}</h2>${hist}</div>`;
+  }
+
+  html += `<div class="card tipcard">
+    <h2>${t.tipsTitle}</h2>
+    <p>${t.tips[tipIdx % t.tips.length]}</p>
+    <button class="ghost" onclick="nextTip()">${t.nextTip}</button>
+  </div>
+  <p class="note">${t.savedNote}</p>`;
+
+  $('app').innerHTML = html;
+}
+render();
+</script>
+</body>
+</html>
